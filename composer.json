@@ -9,8 +9,8 @@
   },
   "autoload": {
     "psr-4": {
-      "Tests\\": "tests/",
-      "": "src/"
+      "App\\": "src/",
+      "Tests\\": "tests/"
     }
   },
   "scripts": {
