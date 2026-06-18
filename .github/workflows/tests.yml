@@ -1,0 +1,49 @@
+name: Executar Testes Unitários
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        php-version: ['8.3']
+
+    steps:
+    - name: Checkout do código
+      uses: actions/checkout@v4
+
+    - name: Setup PHP ${{ matrix.php-version }}
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-version }}
+        extensions: curl, json
+        tools: phpunit, composer
+
+    - name: Validar composer.json
+      run: composer validate --strict
+
+    - name: Instalar dependências do Composer
+      run: composer install --prefer-dist --no-progress --no-suggest
+
+    - name: Executar testes unitários com PHPUnit
+      run: composer test
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+    - name: Gerar relatório de cobertura (opcional)
+      run: vendor/bin/phpunit --coverage-text
+      continue-on-error: true
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+    - name: Enviar relatório para Codecov (opcional)
+      uses: codecov/codecov-action@v3
+      continue-on-error: true
+      with:
+        files: ./coverage.xml
