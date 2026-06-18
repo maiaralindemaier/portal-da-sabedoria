@@ -1,0 +1,19 @@
+{
+  "name": "portal-da-sabedoria/portal",
+  "description": "Aplicação web integrada a API de inteligência artificial Gemini",
+  "require": {
+    "php": ">=8.3"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^11.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Tests\\": "tests/",
+      "": "src/"
+    }
+  },
+  "scripts": {
+    "test": "phpunit"
+  }
+}

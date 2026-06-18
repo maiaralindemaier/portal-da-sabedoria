@@ -1,13 +1,95 @@
-<?php
+    <?php
 
-class IAService
-{
-    public function enviarPergunta(string $pergunta): string
+    class IAService
     {
-        if (empty(trim($pergunta))) {
-            return "Por favor, faça uma pergunta ao Gênio.";
+        private string $apiKey;
+        private string $apiUrl ="https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent";
+
+        public function __construct()
+        {
+            $this->carregarEnv();
+            $this->apiKey = $_ENV['GEMINI_API_KEY'] ?? '';
         }
 
-        return "O conhecimento está sendo consultado...";
+        private function carregarEnv(): void
+        {
+            $envFile = __DIR__ . '/../.env';
+            if (file_exists($envFile)) {
+                $linhas = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+                foreach ($linhas as $linha) {
+                    if (strpos($linha, '=') !== false && strpos($linha, '#') === 0) {
+                        [$chave, $valor] = explode('=', $linha, 2);
+                        $_ENV[trim($chave)] = trim($valor);
+                    } elseif (strpos($linha, '=') !== false && strpos($linha, '#') !== 0) {
+                        [$chave, $valor] = explode('=', $linha, 2);
+                        $_ENV[trim($chave)] = trim($valor);
+                    }
+                }
+            }
+        }
+
+        public function enviarPergunta(string $pergunta): string
+        {
+            if (empty(trim($pergunta))) {
+                return "Por favor, faça uma pergunta ao Gênio.";
+            }
+
+            if (empty($this->apiKey)) {
+                return "Erro: Chave da API Gemini não configurada.";
+            }
+
+            return $this->chamarGemini($pergunta);
+        }
+
+        private function chamarGemini(string $pergunta): string
+        {
+            $dataAtual = date('d/m/Y');
+            $anoAtual = date('Y');
+            
+            $contexto = "Data atual: $dataAtual (Ano: $anoAtual)\n" .
+                        "Por favor, fornça informações atualizadas considerando a data atual acima. " .
+                        "Use dados e eventos recentes até $dataAtual.\n\n";
+            
+            $perguntaComContexto = $contexto . $pergunta;
+
+            $payload = [
+                'contents' => [
+                    [
+                        'parts' => [
+                            ['text' => $perguntaComContexto]
+                        ]
+                    ]
+                ],
+                'generationConfig' => [
+                    'temperature' => 0.7,
+                    'topK' => 40,
+                    'topP' => 0.95
+                ]
+            ];
+
+            $ch = curl_init();
+            curl_setopt_array($ch, [
+                CURLOPT_URL => $this->apiUrl . "?key=" . $this->apiKey,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => json_encode($payload),
+                CURLOPT_TIMEOUT => 30
+            ]);
+
+            $resposta = curl_exec($ch);
+            $erro = curl_error($ch);
+            curl_close($ch);
+
+            if ($erro) {
+                return "Erro ao conectar com a API: " . $erro;
+            }
+
+            $dados = json_decode($resposta, true);
+            if (isset($dados['candidates'][0]['content']['parts'][0]['text'])) {
+                return "🧞 O Gênio revela:\n\n" . $dados['candidates'][0]['content']['parts'][0]['text'];
+            }
+
+            return "O Gênio não conseguiu formular uma resposta no momento.";
+        }
     }
-}
