@@ -1,6 +1,7 @@
 {
   "name": "portal-da-sabedoria/portal",
   "description": "Aplicação web integrada a API de inteligência artificial Gemini",
+  "license": "MIT",
   "require": {
     "php": ">=8.3"
   },
