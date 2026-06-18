@@ -6,8 +6,11 @@ RUN a2enmod rewrite
 # Instala extensões básicas (banco de dados, etc.)
 RUN docker-php-ext-install pdo pdo_mysql
 
-# Instala curl (necessário para chamadas de API)
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+# Instala curl e outras ferramentas necessárias
+RUN apt-get update && apt-get install -y curl zip unzip git && rm -rf /var/lib/apt/lists/*
+
+# Instala Composer globalmente
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Ajusta permissões do Apache para apontar para o diretório public
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public

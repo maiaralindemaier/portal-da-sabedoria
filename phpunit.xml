@@ -16,12 +16,4 @@
         </testsuite>
     </testsuites>
 
-    <coverage processUncoveredFiles="true">
-        <include>
-            <directory suffix=".php">src</directory>
-        </include>
-        <exclude>
-            <directory suffix="Test.php">src</directory>
-        </exclude>
-    </coverage>
 </phpunit>

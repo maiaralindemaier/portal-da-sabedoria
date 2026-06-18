@@ -1,10 +1,16 @@
 /vendor/
 
 .env
+.env.local
+.env.*.local
 
 composer.lock
+composer.phar
 
 .phpunit.result.cache
+.phpunit.cache
+coverage/
+coverage.xml
 
 .idea/
 .vscode/

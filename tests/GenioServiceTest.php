@@ -1,22 +1,22 @@
 <?php
 
-// Testes básicos da classe GenioService
-class GenioServiceTest
+use PHPUnit\Framework\TestCase;
+
+final class GenioServiceTest extends TestCase
 {
-    public function testFormatarResposta()
+    protected function setUp(): void
     {
         require_once __DIR__ . '/../src/GenioService.php';
+    }
+
+    public function testFormatarResposta(): void
+    {
         $genioService = new GenioService();
-        
+
         $resposta = "Teste de resposta";
         $resultado = $genioService->formatarResposta($resposta);
-        
-        assert(strpos($resultado, "🧞 O Gênio revela:") !== false, "Resposta deveria conter o prefixo do Gênio");
-        assert(strpos($resultado, $resposta) !== false, "Resposta deveria conter o texto original");
+
+        $this->assertStringContainsString("🧞 O Gênio revela:", $resultado);
+        $this->assertStringContainsString($resposta, $resultado);
     }
 }
-
-// Executar testes
-$teste = new GenioServiceTest();
-$teste->testFormatarResposta();
-echo "✓ Todos os testes de GenioService passaram!\n";

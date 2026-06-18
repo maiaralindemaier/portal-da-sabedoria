@@ -8,23 +8,39 @@
         public function __construct()
         {
             $this->carregarEnv();
-            $this->apiKey = $_ENV['GEMINI_API_KEY'] ?? '';
+            $this->apiKey = getenv('GEMINI_API_KEY') ?: ($_ENV['GEMINI_API_KEY'] ?? '');
         }
 
         private function carregarEnv(): void
         {
             $envFile = __DIR__ . '/../.env';
-            if (file_exists($envFile)) {
-                $linhas = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-                foreach ($linhas as $linha) {
-                    if (strpos($linha, '=') !== false && strpos($linha, '#') === 0) {
-                        [$chave, $valor] = explode('=', $linha, 2);
-                        $_ENV[trim($chave)] = trim($valor);
-                    } elseif (strpos($linha, '=') !== false && strpos($linha, '#') !== 0) {
-                        [$chave, $valor] = explode('=', $linha, 2);
-                        $_ENV[trim($chave)] = trim($valor);
-                    }
+            if (!file_exists($envFile)) {
+                return;
+            }
+
+            $linhas = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            foreach ($linhas as $linha) {
+                $linha = trim($linha);
+                if ($linha === '' || str_starts_with($linha, '#')) {
+                    continue;
                 }
+
+                if (strpos($linha, '=') === false) {
+                    continue;
+                }
+
+                [$chave, $valor] = explode('=', $linha, 2);
+                $chave = trim($chave);
+                $valor = trim($valor);
+
+                // Não sobrescreve variáveis de ambiente já definidas
+                if (getenv($chave) !== false || array_key_exists($chave, $_ENV) || array_key_exists($chave, $_SERVER)) {
+                    continue;
+                }
+
+                $_ENV[$chave] = $valor;
+                putenv("$chave=$valor");
+                $_SERVER[$chave] = $valor;
             }
         }
 
@@ -32,6 +48,11 @@
         {
             if (empty(trim($pergunta))) {
                 return "Por favor, faça uma pergunta ao Gênio.";
+            }
+
+            if (empty($this->apiKey)) {
+                // Ler novamente da variável de ambiente para garantir consistência
+                $this->apiKey = getenv('GEMINI_API_KEY') ?: ($_ENV['GEMINI_API_KEY'] ?? '');
             }
 
             if (empty($this->apiKey)) {
