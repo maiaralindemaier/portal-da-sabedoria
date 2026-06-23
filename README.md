@@ -93,6 +93,7 @@ Para habilitar o CI, faça push para o repositório remoto. Certifique-se de con
 
 **Boas práticas e observações**
 - Nunca versionar o arquivo `.env` com chaves sensíveis (o `.gitignore` já inclui `.env`).
+- Nunca versionar a pasta `vendor/`; use o Composer para instalar dependências no ambiente de desenvolvimento ou CI.
 - Nos testes, a chamada real à API deve ser substituída por mocks para evitar dependências externas e taxas. Há testes básicos no diretório `tests/` — considere aplicar mocks ao `IAService` antes de testar integração.
 - Se seu ambiente local não tiver `composer`, use sempre o Composer dentro do container (conforme instruções acima).
 
