@@ -3,8 +3,7 @@
     class IAService
     {
         private string $apiKey;
-        private string $apiUrl ="https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent";
-
+         private string $apiUrl = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent";
         public function __construct()
         {
             $this->carregarEnv();
@@ -64,14 +63,11 @@
 
         private function chamarGemini(string $pergunta): string
         {
-            $dataAtual = date('d/m/Y');
-            $anoAtual = date('Y');
-            
-            $contexto = "Data atual: $dataAtual (Ano: $anoAtual)\n" .
-                        "Por favor, fornça informações atualizadas considerando a data atual acima. " .
-                        "Use dados e eventos recentes até $dataAtual.\n\n";
-            
-            $perguntaComContexto = $contexto . $pergunta;
+            $instrucao = "Você é um assistente que responde apenas à última pergunta feita. " .
+                         "Não inclua histórico de perguntas anteriores nem informações não solicitadas. " .
+                         "Responda de forma direta e objetiva.\n\n";
+
+            $perguntaComContexto = $instrucao . $pergunta;
 
             $payload = [
                 'contents' => [
